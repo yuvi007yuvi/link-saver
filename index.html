@@ -1,0 +1,991 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portal Buddy</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.2/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --sidebar-width: 250px;
+            --navbar-height: 70px;
+            --primary-color: #4f46e5;
+            --primary-dark: #4338ca;
+            --danger-color: #ef4444;
+            --danger-dark: #dc2626;
+            --bg-color: #f3f4f6;
+            --card-bg: rgba(255, 255, 255, 0.95);
+            --text-primary: #111827;
+            --text-secondary: #4b5563;
+            --border-radius: 12px;
+            --transition: all 0.3s ease;
+            --category-work: #6366f1;
+            --category-personal: #f59e0b;
+            --category-study: #10b981;
+            --category-other: #f97316;
+            --glass-border: 1px solid rgba(255, 255, 255, 0.2);
+            --glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+            --neon-glow: 0 0 15px rgba(79, 70, 229, 0.3);
+            --grid-gap: 24px;
+            --card-min-width: 320px;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background: linear-gradient(135deg, var(--bg-color), #e5e7eb);
+            min-height: 100vh;
+            color: var(--text-primary);
+            line-height: 1.6;
+            position: relative;
+            overflow-x: hidden;
+            font-size: 16px;
+        }
+
+        body::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: radial-gradient(circle at 50% 50%, rgba(74, 144, 226, 0.1), transparent 60%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .sidebar {
+            width: var(--sidebar-width);
+            height: 100vh;
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-right: var(--glass-border);
+            padding: 20px;
+            position: fixed;
+            left: 0;
+            top: 0;
+            z-index: 1000;
+            transition: var(--transition);
+            overflow-y: auto;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 280px;
+                z-index: 1050;
+                box-shadow: var(--glass-shadow);
+                transition: transform 0.3s ease;
+                position: fixed;
+                top: 0;
+                left: 0;
+                height: 100vh;
+                background: var(--card-bg);
+                backdrop-filter: blur(16px);
+                -webkit-backdrop-filter: blur(16px);
+            }
+
+            .sidebar.show {
+                transform: translateX(0);
+            }
+
+            .navbar {
+                left: 0;
+                width: 100%;
+                padding: 0 15px;
+                position: fixed;
+                top: 0;
+                z-index: 1000;
+            }
+
+            .search-bar {
+                max-width: 200px;
+                margin: 0 10px;
+                flex: 1;
+            }
+
+            .user-profile {
+                gap: 10px;
+                display: flex;
+                align-items: center;
+            }
+
+            .user-profile span {
+                display: none;
+            }
+
+            .main-container {
+                margin-left: 0;
+                width: 100%;
+                padding-top: calc(var(--navbar-height) + 20px);
+            }
+        }
+
+        .search-bar {
+            max-width: 200px;
+            margin: 0 10px;
+        }
+
+        .user-profile {
+            gap: 10px;
+        }
+
+        .user-profile span {
+            display: none;
+        }
+
+        .sidebar-nav a {
+            padding: 15px;
+            font-size: 15px;
+        }
+
+        .sidebar-header {
+            padding: 15px 0;
+        }
+
+
+        .sidebar-header {
+            padding: 20px 0;
+            text-align: center;
+            border-bottom: var(--glass-border);
+            margin-bottom: 20px;
+        }
+
+        .sidebar-nav {
+            list-style: none;
+        }
+
+        .sidebar-nav li {
+            margin: 10px 0;
+        }
+
+        .sidebar-nav a {
+            color: var(--text-primary);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            padding: 12px 15px;
+            border-radius: var(--border-radius);
+            transition: var(--transition);
+            width: 100%;
+            font-size: 16px;
+        }
+
+        .sidebar-nav a:hover {
+            background: rgba(79, 70, 229, 0.1);
+            color: var(--primary-color);
+            transform: translateX(5px);
+        }
+
+        .navbar {
+            height: var(--navbar-height);
+            background: var(--card-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-bottom: var(--glass-border);
+            position: fixed;
+            top: 0;
+            left: var(--sidebar-width);
+            right: 0;
+            z-index: 99;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 20px;
+            transition: var(--transition);
+        }
+
+        .search-bar {
+            flex: 1;
+            max-width: 400px;
+            margin: 0 20px;
+        }
+
+        .search-bar input {
+            width: 100%;
+            margin: 0;
+        }
+
+        .user-profile {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .main-container {
+            margin-left: var(--sidebar-width);
+            margin-top: var(--navbar-height);
+            padding: 40px 20px;
+            width: calc(100% - var(--sidebar-width));
+        }
+
+        @media (max-width: 768px) {
+            .main-container {
+                margin-left: 0;
+                width: 100%;
+            }
+        }
+
+        .auth-section,
+        .links-section,
+        .dashboard-section {
+            background: var(--card-bg);
+            padding: 30px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--glass-shadow);
+            margin-bottom: 30px;
+            transition: var(--transition);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: var(--glass-border);
+            position: relative;
+            z-index: 1;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--grid-gap);
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 576px) {
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .stat-card {
+            background: var(--card-bg);
+            padding: 28px;
+            border-radius: var(--border-radius);
+            box-shadow: var(--glass-shadow);
+            text-align: center;
+            transition: var(--transition);
+            border: var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 24px rgba(0, 0, 0, 0.1);
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: var(--transition);
+        }
+
+        .stat-card:hover::before {
+            transform: translateX(100%);
+        }
+
+        .stat-card h3 {
+            color: var(--text-secondary);
+            font-size: 1.1em;
+            margin-bottom: 10px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 2.5em;
+            font-weight: 700;
+            margin-bottom: 5px;
+            background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stat-card[data-category="work"] .stat-value {
+            background: linear-gradient(45deg, var(--category-work), #6d28d9);
+        }
+
+        .stat-card[data-category="personal"] .stat-value {
+            background: linear-gradient(45deg, var(--category-personal), #d97706);
+        }
+
+        .stat-card[data-category="study"] .stat-value {
+            background: linear-gradient(45deg, var(--category-study), #15803d);
+        }
+
+        .stat-card[data-category="other"] .stat-value {
+            background: linear-gradient(45deg, var(--category-other), #c2410c);
+        }
+
+        .links-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: var(--grid-gap);
+        }
+
+        @media (max-width: 576px) {
+            .links-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stat-card {
+                padding: 15px;
+            }
+
+            .stat-card .stat-value {
+                font-size: 2em;
+            }
+
+            .link-card {
+                padding: 15px;
+            }
+
+            .main-container {
+                padding: 20px 10px;
+            }
+
+            h1 {
+                font-size: 2em;
+                margin-bottom: 20px;
+            }
+
+            h2 {
+                font-size: 1.5em;
+                margin-bottom: 15px;
+            }
+        }
+
+        .dashboard-section {
+            display: none;
+        }
+
+        .links-section {
+            display: none;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: var(--glass-border);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 600;
+            transition: var(--transition);
+            margin: 5px;
+            outline: none;
+            position: relative;
+            overflow: hidden;
+            background: rgba(74, 144, 226, 0.1);
+        }
+
+        .btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(120deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+            transition: var(--transition);
+        }
+
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background-color: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: var(--neon-glow);
+        }
+
+        .btn-primary:active {
+            transform: translateY(0);
+            box-shadow: none;
+        }
+
+        .btn-primary:hover::before {
+            left: 100%;
+        }
+
+        input,
+        select {
+            padding: 12px;
+            margin: 8px 0;
+            border: var(--glass-border);
+            border-radius: var(--border-radius);
+            width: 100%;
+            max-width: 300px;
+            transition: var(--transition);
+            font-size: 16px;
+            color: var(--text-primary);
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+
+        input:focus,
+        select:focus {
+            border-color: var(--primary-color);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(74, 144, 226, 0.1);
+        }
+
+        .link-card {
+            background: var(--card-bg);
+            padding: 24px;
+            margin: 15px 0;
+            border-radius: var(--border-radius);
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: space-between;
+            align-items: flex-start;
+            transition: var(--transition);
+            border-left: 5px solid;
+            box-shadow: var(--glass-shadow);
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: var(--glass-border);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .link-card[data-category="work"] {
+            border-left-color: var(--category-work);
+        }
+
+        .link-card[data-category="personal"] {
+            border-left-color: var(--category-personal);
+        }
+
+        .link-card[data-category="study"] {
+            border-left-color: var(--category-study);
+        }
+
+        .link-card[data-category="other"] {
+            border-left-color: var(--category-other);
+        }
+
+        .link-card:hover {
+            transform: translateY(-3px);
+            box-shadow: var(--glass-shadow);
+        }
+
+        .link-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+            transform: translateX(-100%);
+            transition: var(--transition);
+        }
+
+        .link-card h3 {
+            color: var(--text-primary);
+            margin-bottom: 8px;
+        }
+
+        .link-card a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-size: 14px;
+        }
+
+        .link-card p {
+            color: var(--text-secondary);
+            font-size: 14px;
+            margin-top: 8px;
+        }
+
+        .delete-btn {
+            background-color: var(--danger-color);
+            color: white;
+            padding: 8px 16px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 600;
+        }
+
+        .delete-btn:hover {
+            background-color: var(--danger-dark);
+            transform: translateY(-2px);
+        }
+
+        h1 {
+            color: var(--text-primary);
+            margin-bottom: 40px;
+            font-size: 2.5em;
+            text-align: center;
+            font-weight: 700;
+            text-shadow: var(--neon-glow);
+            letter-spacing: 2px;
+        }
+
+        h2 {
+            color: var(--text-primary);
+            margin-bottom: 20px;
+            font-size: 1.8em;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <nav class="sidebar" id="sidebar">
+        <div class="sidebar-header d-flex justify-content-between align-items-center">
+            <div class="d-flex align-items-center">
+                <img src="portal-buddy-logo.gif" alt="Portal Buddy Logo" style="height: 80px; margin-right: 10px;">
+                <h2>Portal Buddy</h2>
+            </div>
+            <button class="btn d-md-none" onclick="toggleSidebar()">
+                <i class="bi bi-x-lg"></i>
+            </button>
+        </div>
+        <ul class="sidebar-nav list-unstyled">
+            <li><a href="#" data-section="dashboard" class="d-flex align-items-center"><i
+                        class="bi bi-speedometer2 me-2"></i>Dashboard</a></li>
+            <li><a href="#" data-section="links" class="d-flex align-items-center"><i
+                        class="bi bi-link-45deg me-2"></i>All Links</a></li>
+
+            <!-- Custom Dropdown -->
+            <li class="nav-item">
+                <a href="#" class="nav-link d-flex align-items-center" data-bs-toggle="collapse"
+                    data-bs-target="#analysisMenu" aria-expanded="false">
+                    <i class="bi bi-graph-up me-2"></i>Analysis Tools
+                </a>
+                <ul class="collapse list-unstyled ps-3" id="analysisMenu">
+                    <li><a class="d-flex align-items-center" href="#"><i class="bi bi-graph-up me-2"></i>Reports</a>
+                    </li>
+                    <li><a class="d-flex align-items-center" href="https://yuvi007yuvi.github.io/COVERAGE-TRACKER"
+                            target="_blank"><i class="bi bi-graph-down me-2"></i>Coverage Analysis</a></li>
+                    <li><a class="d-flex align-items-center" href="https://yuvi007yuvi.github.io/BEFORE-AND-AFTER"
+                            target="_blank"><i class="bi bi-arrow-left-right me-2"></i>Before/After Analysis</a></li>
+                    <li><a class="d-flex align-items-center" href="https://yuvi007yuvi.github.io/kml-checker"
+                            target="_blank"><i class="bi bi-file-earmark-check me-2"></i>KML Checker</a></li>
+
+                </ul>
+            </li>
+        </ul>
+    </nav>
+    <nav class="navbar">
+        <div class="d-flex align-items-center">
+            <button class="btn d-md-none me-2" onclick="toggleSidebar()">
+                <i class="bi bi-list"></i>
+            </button>
+            <div class="search-bar">
+                <input type="text" class="form-control" placeholder="Search links..." />
+            </div>
+        </div>
+        <div class="user-profile">
+            <span id="userEmail"></span>
+            <button class="btn btn-primary ms-2" onclick="signOut()"><i
+                    class="bi bi-box-arrow-right me-1"></i>Logout</button>
+        </div>
+    </nav>
+
+    <div class="main-container">
+        <div class="text-center mb-4">
+            <img src="portal-buddy-logo.gif" alt="Portal Buddy Logo" style="height: 120px; margin-bottom: 20px;">
+            <h1 style="margin-bottom: 30px;">Portal Buddy</h1>
+        </div>
+
+
+
+        <!-- Dashboard Section -->
+        <div id="dashboardSection" class="dashboard-section">
+            <h2>Dashboard Overview</h2>
+            <div class="stats-grid">
+                <div class="stat-card" data-category="total">
+                    <h3>Total Links</h3>
+                    <div class="stat-value" id="totalLinks">0</div>
+                </div>
+            </div>
+            <h2 class="mt-4">Analysis Tools</h2>
+            <div class="stats-grid">
+                <div class="stat-card"
+                    onclick="window.open('https://yuvi007yuvi.github.io/COVERAGE-TRACKER/', '_blank')"
+                    style="cursor: pointer;">
+                    <i class="bi bi-graph-down" style="font-size: 2em; color: var(--primary-color);"></i>
+                    <h3 class="mt-3">Coverage Analysis</h3>
+                    <p class="text-muted">Analyze coverage fluctuations</p>
+                </div>
+                <div class="stat-card"
+                    onclick="window.open('https://yuvi007yuvi.github.io/BEFORE-AND-AFTER/', '_blank')"
+                    style="cursor: pointer;">
+                    <i class="bi bi-arrow-left-right" style="font-size: 2em; color: var(--primary-color);"></i>
+                    <h3 class="mt-3">Before/After Analysis</h3>
+                    <p class="text-muted">Compare before and after states</p>
+                </div>
+                <div class="stat-card" onclick="window.open('https://yuvi007yuvi.github.io/kml-checker-/', '_blank')"
+                    style="cursor: pointer;">
+                    <i class="bi bi-file-earmark-check" style="font-size: 2em; color: var(--primary-color);"></i>
+                    <h3 class="mt-3">KML Checker</h3>
+                    <p class="text-muted">Validate KML files</p>
+                </div>
+            </div>
+            <div class="links-grid" id="dashboardLinksList"></div>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="reportsSection" class="reports-section" style="display: none;">
+            <h2>Link Analytics</h2>
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="auth-section p-4">
+                        <h3 class="h4 mb-3">Category Distribution</h3>
+                        <div class="d-flex flex-column gap-3">
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar bg-primary" id="workProgress" role="progressbar"
+                                    style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar bg-warning" id="personalProgress" role="progressbar"
+                                    style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar bg-success" id="studyProgress" role="progressbar"
+                                    style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                            <div class="progress" style="height: 25px;">
+                                <div class="progress-bar bg-info" id="otherProgress" role="progressbar"
+                                    style="width: 0%" aria-valuenow="0" aria-valuemin="0" aria-valuemax="100"></div>
+                            </div>
+                        </div>
+                        <div class="mt-3">
+                            <div class="d-flex justify-content-between">
+                                <span class="badge bg-primary">Work</span>
+                                <span id="workPercentage">0%</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="badge bg-warning">Personal</span>
+                                <span id="personalPercentage">0%</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="badge bg-success">Study</span>
+                                <span id="studyPercentage">0%</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="badge bg-info">Other</span>
+                                <span id="otherPercentage">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="auth-section p-4">
+                        <h3 class="h4 mb-3">Recent Activity</h3>
+                        <div id="recentActivity" class="d-flex flex-column gap-2">
+                            <!-- Recent activity will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Links Management Section -->
+        <div id="linksSection" class="links-section" <h2>My Links</h2>
+            <div class="row g-3 align-items-end mb-4">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="linkInput" placeholder="Enter URL" />
+                </div>
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="titleInput" placeholder="Enter Title" />
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="categoryInput">
+                        <option value="work">Work</option>
+                        <option value="personal">Personal</option>
+                        <option value="study">Study</option>
+                        <option value="other">Other</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <button class="btn btn-primary w-100" onclick="addLink()">Add Link</button>
+                </div>
+            </div>
+            <div id="linksList"></div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script type="module">
+        // Import the functions you need from the SDKs
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut as firebaseSignOut, onAuthStateChanged } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, deleteDoc, doc, query, where, orderBy, getDocs, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-analytics.js";
+
+        // Firebase configuration
+        const firebaseConfig = {
+            apiKey: "AIzaSyA3cOll6BHYP7qw0tu3Z0NumpnU1AeKCgo",
+            authDomain: "link-saver-254b2.firebaseapp.com",
+            databaseURL: "https://link-saver-254b2-default-rtdb.firebaseio.com",
+            projectId: "link-saver-254b2",
+            storageBucket: "link-saver-254b2.firebasestorage.app",
+            messagingSenderId: "1050619171798",
+            appId: "1:1050619171798:web:421e9f92e7c611a8dcca77",
+            measurementId: "G-K8ZSJ080B8"
+        };
+
+        // Initialize Firebase
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+
+        // Expose functions to global scope
+        // Check authentication state
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+            document.getElementById('userEmail').textContent = user.email;
+            loadLinks();
+        });
+
+        window.signOut = function () {
+            firebaseSignOut(auth)
+                .then(() => {
+                    console.log('User signed out');
+                })
+                .catch((error) => {
+                    console.error('Error:', error.message);
+                });
+        };
+
+        window.addLink = function () {
+            const url = document.getElementById('linkInput').value;
+            const title = document.getElementById('titleInput').value;
+            const category = document.getElementById('categoryInput').value;
+            const userId = auth.currentUser.uid;
+
+            addDoc(collection(db, 'links'), {
+                url,
+                title,
+                category,
+                userId,
+                createdAt: serverTimestamp()
+            })
+                .then(() => {
+                    document.getElementById('linkInput').value = '';
+                    document.getElementById('titleInput').value = '';
+                    loadLinks();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('Error adding link');
+                });
+        };
+
+        window.deleteLink = function (docId) {
+            deleteDoc(doc(db, 'links', docId))
+                .then(() => {
+                    loadLinks();
+                })
+                .catch((error) => {
+                    console.error('Error:', error);
+                    alert('Error deleting link');
+                });
+        };
+
+        window.loadLinks = async function () {
+            const userId = auth.currentUser.uid;
+            const linksList = document.getElementById('linksList');
+            const dashboardLinksList = document.getElementById('dashboardLinksList');
+
+            // Clear existing links
+            linksList.innerHTML = '';
+            dashboardLinksList.innerHTML = '';
+
+            const q = query(
+                collection(db, 'links'),
+                where('userId', '==', userId),
+                orderBy('createdAt', 'desc')
+            );
+
+            try {
+                const querySnapshot = await getDocs(q);
+                const links = [];
+                querySnapshot.forEach((doc) => {
+                    const link = { ...doc.data(), id: doc.id };
+                    links.push(link);
+                    renderLinkCard(doc.id, link, linksList);
+                    renderLinkCard(doc.id, link, dashboardLinksList);
+                });
+                updateDashboardStats(links);
+            } catch (error) {
+                console.error('Error:', error);
+            }
+        };
+
+        function renderLinkCard(docId, link, container) {
+            const card = document.createElement('div');
+            card.className = 'link-card';
+            card.setAttribute('data-category', link.category);
+
+            const contentDiv = document.createElement('div');
+            contentDiv.className = 'link-content flex-grow-1 me-3';
+
+            const title = document.createElement('h3');
+            title.textContent = link.title;
+            title.className = 'h5 mb-2';
+
+            const url = document.createElement('a');
+            url.href = link.url;
+            url.target = '_blank';
+            url.textContent = link.url;
+            url.className = 'd-block text-break mb-2 text-primary text-decoration-none';
+            url.style.transition = 'var(--transition)';
+            url.onmouseover = () => {
+                url.style.color = 'var(--primary-dark)';
+                url.style.textDecoration = 'underline';
+            };
+            url.onmouseout = () => {
+                url.style.color = '';
+                url.style.textDecoration = 'none';
+            };
+
+            const category = document.createElement('p');
+            category.textContent = `Category: ${link.category.charAt(0).toUpperCase() + link.category.slice(1)}`;
+            category.className = 'mb-0 badge bg-secondary';
+
+            const deleteBtn = document.createElement('button');
+            deleteBtn.className = 'delete-btn btn btn-danger';
+            deleteBtn.innerHTML = '<i class="bi bi-trash"></i>';
+            deleteBtn.onclick = () => deleteLink(docId);
+
+            contentDiv.appendChild(title);
+            contentDiv.appendChild(url);
+            contentDiv.appendChild(category);
+
+            card.appendChild(contentDiv);
+            card.appendChild(deleteBtn);
+
+            container.appendChild(card);
+        }
+
+        function updateDashboardStats(links) {
+            const linkArray = links || [];
+            const total = linkArray.length;
+            const workCount = linkArray.filter(l => l.category === 'work').length;
+            const personalCount = linkArray.filter(l => l.category === 'personal').length;
+            const studyCount = linkArray.filter(l => l.category === 'study').length;
+            const otherCount = linkArray.filter(l => l.category === 'other').length;
+
+            // Update counts
+            document.getElementById('totalLinks').textContent = total;
+            document.getElementById('workLinks').textContent = workCount;
+            document.getElementById('personalLinks').textContent = personalCount;
+            document.getElementById('studyLinks').textContent = studyCount;
+            document.getElementById('otherLinks').textContent = otherCount;
+
+            // Update progress bars and percentages
+            if (total > 0) {
+                const workPercent = (workCount / total * 100).toFixed(1);
+                const personalPercent = (personalCount / total * 100).toFixed(1);
+                const studyPercent = (studyCount / total * 100).toFixed(1);
+                const otherPercent = (otherCount / total * 100).toFixed(1);
+
+                document.getElementById('workProgress').style.width = workPercent + '%';
+                document.getElementById('personalProgress').style.width = personalPercent + '%';
+                document.getElementById('studyProgress').style.width = studyPercent + '%';
+                document.getElementById('otherProgress').style.width = otherPercent + '%';
+
+                document.getElementById('workPercentage').textContent = workPercent + '%';
+                document.getElementById('personalPercentage').textContent = personalPercent + '%';
+                document.getElementById('studyPercentage').textContent = studyPercent + '%';
+                document.getElementById('otherPercentage').textContent = otherPercent + '%';
+            }
+
+            // Update recent activity
+            const recentActivity = document.getElementById('recentActivity');
+            recentActivity.innerHTML = '';
+
+            linkArray.slice(0, 5).forEach(link => {
+                const activityItem = document.createElement('div');
+                activityItem.className = 'p-2 border rounded';
+                activityItem.innerHTML = `
+                    <div class="d-flex justify-content-between align-items-center">
+                        <span class="text-truncate" style="max-width: 200px;">${link.title}</span>
+                        <span class="badge bg-${getCategoryColor(link.category)}">${link.category}</span>
+                    </div>
+                `;
+                recentActivity.appendChild(activityItem);
+            });
+        }
+
+        function getCategoryColor(category) {
+            const colors = {
+                work: 'primary',
+                personal: 'warning',
+                study: 'success',
+                other: 'info'
+            };
+            return colors[category] || 'secondary';
+        }
+
+        // Auth state observer
+        onAuthStateChanged(auth, (user) => {
+            if (!user) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Show dashboard by default after login
+            const dashboardSection = document.getElementById('dashboardSection');
+            const linksSection = document.getElementById('linksSection');
+            const reportsSection = document.getElementById('reportsSection');
+
+            // Hide all sections first
+            [dashboardSection, linksSection, reportsSection].forEach(section => {
+                if (section) section.style.display = 'none';
+            });
+
+            // Show dashboard section
+            if (dashboardSection) {
+                dashboardSection.style.display = 'block';
+            }
+
+            // Update user info and load links
+            document.getElementById('userEmail').textContent = user.email;
+            loadLinks();
+        });
+
+        // Navigation handling
+        document.querySelectorAll('.sidebar-nav a').forEach(link => {
+            link.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = e.target.getAttribute('data-section');
+                if (section) {
+                    document.querySelectorAll('.dashboard-section, .links-section').forEach(s => s.style.display = 'none');
+                    document.getElementById(`${section}Section`).style.display = 'block';
+                }
+            });
+        });
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function toggleSidebar() {
+            document.getElementById('sidebar').classList.toggle('show');
+        }
+    </script>
+</body>
+
+</html>
